@@ -1,0 +1,128 @@
+--using DB2--
+---------------------------------------------
+--Borough--
+CREATE TABLE BOROUGH (
+b_name VARCHAR (30) NOT NULL UNIQUE,
+num_general_population INTEGER,
+PRIMARY KEY (b_name));
+
+---------------------------------------------
+--Monitored_individual--
+CREATE TABLE MONITORED_INDIVIDUAL(
+record_id INTEGER NOT NULL UNIQUE,
+b_name VARCHAR(30) DEFAULT NULL,
+person_name VARCHAR(30) DEFAULT NULL,
+person_email VARCHAR(40) DEFAULT NULL,
+person_phone_number VARCHAR(20) DEFAULT NULL,
+person_age INTEGER DEFAULT NULL,
+person_street_address VARCHAR(100) DEFAULT NULL,
+
+FOREIGN KEY (b_name) REFERENCES BOROUGH (b_name)
+);
+
+---------------------------------------------
+--potential_individual: 1000 and 1001--
+CREATE TABLE POTENTIAL_INDIVIDUAL (
+record_id INTEGER NOT NULL,
+informed VARCHAR(1) DEFAULT 'f',
+test_date DATE,
+test_result VARCHAR (8),
+
+PRIMARY KEY (record_id),
+FOREIGN KEY (record_id) REFERENCES MONITORED_INDIVIDUAL (record_id)
+);
+
+
+---------------------------------------------
+--Confirmed_patient: 1002, 1003, 1004--
+CREATE TABLE CONFIRMED_PATIENT(
+record_id INTEGER NOT NULL,
+status VARCHAR(10),
+
+PRIMARY KEY (record_id),
+FOREIGN KEY (record_id) REFERENCES MONITORED_INDIVIDUAL (record_id)
+);
+
+
+---------------------------------------------
+--Health_professional--
+CREATE TABLE HEALTH_PROFESSIONAL(
+hospital_id INTEGER NOT NULL,
+professional_phone_number VARCHAR(20),
+designation VARCHAR(20),
+professional_name VARCHAR(25),
+
+PRIMARY KEY (hospital_id)
+
+);
+
+
+---------------------------------------------
+--Drug--
+CREATE TABLE DRUG(
+drug_name VARCHAR(100) NOT NULL,
+ATC_code VARCHAR(7),
+
+PRIMARY KEY (drug_name)
+);
+
+
+---------------------------------------------
+--Administration--
+CREATE TABLE ADMINISTRATION(
+ad_id INTEGER NOT NULL,
+
+drug_name VARCHAR(100) NOT NULL,
+hospital_id INTEGER NOT NULL,
+record_id INTEGER NOT NULL,
+
+ad_dosage DECIMAL(10, 2) NOT NULL,
+ad_timestamp TIMESTAMP NOT NULL,
+
+PRIMARY KEY (ad_id),
+FOREIGN KEY (drug_name) REFERENCES DRUG (drug_name),
+FOREIGN KEY (hospital_id) REFERENCES HEALTH_PROFESSIONAL (hospital_id),
+FOREIGN KEY (record_id) REFERENCES CONFIRMED_PATIENT (record_id)
+);
+
+
+---------------------------------------------
+--contact--
+CREATE TABLE CONTACT(
+person_1 INTEGER NOT NULL,
+person_2 INTEGER NOT NULL,
+
+PRIMARY KEY (person_1, person_2),
+FOREIGN KEY (person_1) REFERENCES MONITORED_INDIVIDUAL (record_id),
+FOREIGN KEY (person_2) REFERENCES MONITORED_INDIVIDUAL (record_id)
+);
+
+
+---------------------------------------------
+--visit--
+CREATE TABLE VISIT(
+record_id INTEGER NOT NULL,
+hospital_id INTEGER NOT NULL,
+ob_timestamp TIMESTAMP NOT NULL,
+
+PRIMARY KEY (record_id, hospital_id, ob_timestamp),
+FOREIGN KEY (record_id) REFERENCES MONITORED_INDIVIDUAL (record_id),
+FOREIGN KEY (hospital_id) REFERENCES HEALTH_PROFESSIONAL (hospital_id) 
+);
+
+
+---------------------------------------------
+--observatoin--
+CREATE TABLE OBSERVATION(
+ob_timestamp TIMESTAMP NOT NULL,
+record_id INTEGER NOT NULL,
+hospital_id INTEGER NOT NULL,
+ob_text VARCHAR(1000),
+
+PRIMARY KEY (ob_timestamp, record_id, hospital_id),
+FOREIGN KEY (record_id) REFERENCES MONITORED_INDIVIDUAL (record_id),
+FOREIGN KEY (hospital_id) REFERENCES HEALTH_PROFESSIONAL (hospital_id) 
+);
+
+
+
